@@ -29,6 +29,7 @@ class Spaceship(GameObject):
     MANEUVERABILITY = 3
     ACCELERATION = 0.25
     BULLET_SPEED = 3
+    MAX_SPEED = 10
 
     def __init__(self, position, create_bullet_callback):
         self.create_bullet_callback = create_bullet_callback
@@ -44,7 +45,11 @@ class Spaceship(GameObject):
         self.direction.rotate_ip(angle)
 
     def accelerate(self):
-        self.velocity += self.direction * self.ACCELERATION
+        if self.velocity.magnitude() > self.MAX_SPEED:
+            self.velocity += self.direction
+        else:
+            self.velocity += self.direction * self.ACCELERATION
+
 
     def draw(self, surface):
         angle = self.direction.angle_to(UP)
@@ -64,6 +69,7 @@ class Asteroid(GameObject):
     def __init__(self, position, create_asteroid_callback, size=3):
         self.create_asteroid_callback = create_asteroid_callback
         self.size = size
+        self.explosion_sound = load_sound("explosion")
 
         size_to_scale = {
             3: 1,
@@ -77,6 +83,7 @@ class Asteroid(GameObject):
         )
 
     def split(self):
+        self.explosion_sound.play()
         if self.size > 1:
             for _ in range(2):
                 asteroid = Asteroid(
